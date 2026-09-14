@@ -29,8 +29,9 @@ func NewStore(uri, dbName string) (*Store, error) {
 	// TLS with MongoDB Atlas, surfacing as "remote error: tls: internal
 	// error". Forcing TLS 1.2 avoids that negotiation failure.
 	tlsConfig := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-	}
+	MinVersion: tls.VersionTLS12,
+	MaxVersion: tls.VersionTLS12,
+}
 
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri).SetTLSConfig(tlsConfig))
 	if err != nil {
