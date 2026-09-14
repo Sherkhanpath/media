@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"log"
 	"time"
 
@@ -23,7 +24,15 @@ func NewStore(uri, dbName string) (*Store, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	// Explicitly set a minimum TLS version. Some container/hosting
+	// environments (e.g. certain Render instances) fail to auto-negotiate
+	// TLS with MongoDB Atlas, surfacing as "remote error: tls: internal
+	// error". Forcing TLS 1.2 avoids that negotiation failure.
+	tlsConfig := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+	}
+
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri).SetTLSConfig(tlsConfig))
 	if err != nil {
 		return nil, err
 	}
