@@ -11,9 +11,9 @@ COPY *.go ./
 RUN CGO_ENABLED=0 GOOS=linux go build -o media-sequencer .
 
 # ---- Final stage ----
-FROM alpine:3.20
+FROM debian:bookworm-slim
 
-RUN apk add --no-cache ca-certificates
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
